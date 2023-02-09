@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "==1.21.6"
+pandas = "==1.3.5"
+seaborn = "==0.11.2"
+matplotlib = "==3.5.1"
+geopandas = "==0.12.2"
+scikit-learn = "==1.0.2"
+plotly = "==5.5.0"
+pygeos = "==0.14"
+xarray = "==0.19.0"
+kaleido = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

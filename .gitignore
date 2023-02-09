@@ -1,0 +1,7 @@
+.vscode
+__pycache__/
+.DS_Store
+.ipynb_checkpoints
+setup.cfg
+figures/
+Pipfile.lock
