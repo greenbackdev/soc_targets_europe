@@ -258,8 +258,7 @@ if __name__ == "__main__":
     ac_clustering_method_soil = AgglomerativeClustering
     ac_kwargs_clustering_climate = {"linkage": "ward"}
     ac_kwargs_clustering_soil = {"linkage": "ward"}
-    # ac_n_clusters = range(3, 20)
-    ac_n_clusters = range(3, 6)
+    ac_n_clusters = range(3, 20)
     ac_figures_folder = os.path.join(
         figures_folder, 'agglomerative_clustering')
     _ = PedoclimaticClusteringAnalyis(
@@ -276,8 +275,7 @@ if __name__ == "__main__":
     gm_clustering_method_soil = mixture.GaussianMixture
     gm_kwargs_clustering_climate = {"covariance_type": "full"}
     gm_kwargs_clustering_soil = {"covariance_type": "full"}
-    # gm_n_clusters = range(3, 20)
-    gm_n_clusters = range(3, 6)
+    gm_n_clusters = range(3, 20)
     gm_figures_folder = os.path.join(figures_folder, 'gaussian_mixture')
     _ = PedoclimaticClusteringAnalyis(
         gm_clustering_method_climate,
