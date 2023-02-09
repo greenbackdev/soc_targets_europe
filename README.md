@@ -10,8 +10,6 @@ Submitted to xxx in date xxx
 
 Requires Python 3.9. For the packages requirements, see `Pipfile`.
 
-## Set-up
-
 ```
 pip install pipenv
 ````
