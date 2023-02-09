@@ -1,3 +1,10 @@
+"""
+Performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian
+Mixture with 3 to 19 clusters. Plots the associated clustering metrics, maps
+of the climate clusters, statistics of carbonates in the soil clusters and
+texture triangles for the soil clusters.
+"""
+
 import os
 from copy import copy
 
