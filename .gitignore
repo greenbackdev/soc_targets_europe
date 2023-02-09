@@ -4,4 +4,3 @@ __pycache__/
 .ipynb_checkpoints
 setup.cfg
 figures/
-Pipfile.lock
