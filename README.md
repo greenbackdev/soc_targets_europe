@@ -18,16 +18,19 @@ pip install pipenv
 pipenv install
 ```
 
-## How to
+## Scripts
 
 Run scripts using
 ```
 pipenv run python <script.py>
 ```
 
-## Available scripts
-
-- `evaluate_pedoclimatic_clustering.py`: performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian Mixture with 3 to 19 clusters. Plots the associated clustering metrics, maps of the climate clusters, statistics of carbonates in the soil clusters and texture triangles for the soil clusters.
+Avaiable scripts:
+- `evaluate_pedoclimatic_clustering.py`: performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian Mixtures with 3 to 19 clusters. Plots:
+    - clustering metrics;
+    - maps of the climate clusters;
+    - statistics of carbonates in the soil clusters;
+    - texture triangles for the soil clusters.
 
 - `run_pedoclimatic_clustering.py`: #TODO
 
