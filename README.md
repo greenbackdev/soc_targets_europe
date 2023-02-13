@@ -150,8 +150,6 @@ Scripts description:
     - Agglomerative Clustering for soil clustering (4 clusters);
     - Gaussian Mixture for climate clustering (11 clusters).
 
-    Saves results to `output/pedoclimatic_clustering`.
-
 - `run_natural_references_per_pedoclimate.py`: NRpPc - Calculates SOC reference values for each pedoclimatic cluster (output of run_pedoclimatic_clustering.py) using natural references (grasslands and woodlands). Selects only data that did not change land cover between 2009 and 2015.
 
 - `run_data_driven_reciprocal_modelling.py`: DDRM - Gets SOC reference values from the Data-driven reciprocal modelling output.
