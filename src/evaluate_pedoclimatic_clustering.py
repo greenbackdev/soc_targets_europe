@@ -8,8 +8,6 @@ texture triangles for the soil clusters.
 import os
 from copy import copy
 
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 from sklearn import mixture
 from sklearn.cluster import AgglomerativeClustering
@@ -17,10 +15,11 @@ import seaborn as sns
 import plotly.express as px
 import matplotlib.pyplot as plt
 
-from models.pedoclimatic_clustering import CarbonContextualizer, get_lucas_data
+from importers.lucas_importer import LucasDataImporter
+from models.pedoclimatic_clustering import PedoclimaticClustering
 
 
-class PedoclimaticClusteringAnalyis:
+class PedoclimaticClusteringEvaluation:
 
     def __init__(
         self,
@@ -50,21 +49,25 @@ class PedoclimaticClusteringAnalyis:
 
         for n in self.n_clusters:
 
-            context = CarbonContextualizer(data=data,
-                                           clustering_method_climate=self.clustering_method_climate,
-                                           clustering_method_soil=self.clustering_method_soil,
-                                           n_clusters_climate=n,
-                                           n_clusters_soil=n,
-                                           kwargs_clustering_climate=self.kwargs_clustering_climate,
-                                           kwargs_clustering_soil=self.kwargs_clustering_soil)
-            context.run()
-            output_clustering.append(copy(context.data))
-            silhouette_scores_soil.append(context.silhouette_score_soil)
+            pedolcimatic_clustering = PedoclimaticClustering(
+                data=data,
+                clustering_method_climate=self.clustering_method_climate,
+                clustering_method_soil=self.clustering_method_soil,
+                n_clusters_climate=n,
+                n_clusters_soil=n,
+                kwargs_clustering_climate=self.kwargs_clustering_climate,
+                kwargs_clustering_soil=self.kwargs_clustering_soil
+            )
+            pedolcimatic_clustering.run()
+            output_clustering.append(copy(pedolcimatic_clustering.data))
+            silhouette_scores_soil.append(
+                pedolcimatic_clustering.silhouette_score_soil)
             davies_bouldin_scores_soil.append(
-                context.davies_bouldin_score_soil)
-            silhouette_scores_climate.append(context.silhouette_score_climate)
+                pedolcimatic_clustering.davies_bouldin_score_soil)
+            silhouette_scores_climate.append(
+                pedolcimatic_clustering.silhouette_score_climate)
             davies_bouldin_scores_climate.append(
-                context.davies_bouldin_score_climate)
+                pedolcimatic_clustering.davies_bouldin_score_climate)
 
         return (
             output_clustering,
@@ -106,6 +109,7 @@ class PedoclimaticClusteringAnalyis:
                 'clustering_evaluation_soil.pdf'
             )
         )
+        plt.close()
 
         fig, axs = plt.subplots(2, 1, figsize=(8, 10))
         axs[0].plot(n_clusters, silhouette_scores_climate, 'o-')
@@ -128,6 +132,7 @@ class PedoclimaticClusteringAnalyis:
                 'clustering_evaluation_climate.pdf'
             )
         )
+        plt.close()
 
         return
 
@@ -162,6 +167,7 @@ class PedoclimaticClusteringAnalyis:
                     f'{len(cluster_labels_climate_)}_climate_clusters.pdf'
                 )
             )
+            plt.close()
 
         return
 
@@ -190,7 +196,7 @@ class PedoclimaticClusteringAnalyis:
                 i / len(cluster_labels_soil_)) for i, lab in enumerate(cluster_labels_soil_)}
 
             fig, ax = plt.subplots(figsize=(5, 5))
-            self._boxplot(x="Cluster_soil", y='CaCO3_2015', df=df,
+            self._boxplot(x="Cluster_soil", y='CaCO3', df=df,
                           palette=cluster_colors_soil_, ax=ax)
             plt.tight_layout()
             plt.savefig(
@@ -199,6 +205,8 @@ class PedoclimaticClusteringAnalyis:
                     f'{len(cluster_labels_soil_)}_soil_clusters.pdf'
                 )
             )
+            plt.close()
+
         return
 
     def _plot_clusters_soil_texture(self, output_clustering):
@@ -210,7 +218,7 @@ class PedoclimaticClusteringAnalyis:
             cluster_labels_soil_ = sorted(df.Cluster_soil.unique())
             for c in cluster_labels_soil_:
                 fig = px.scatter_ternary(df[df.Cluster_soil == c],
-                                         a="clay_2009", b="sand_2009", c="silt_2009",
+                                         a="clay", b="sand", c="silt",
                                          title="Cluster_soil {0:d}".format(c), width=500, height=500)
                 fig.write_image(
                     os.path.join(
@@ -253,12 +261,19 @@ class PedoclimaticClusteringAnalyis:
 
 if __name__ == "__main__":
 
-    data_folder = os.path.join('data', 'pedoclimatic_clustering')
+    data_folder = os.path.join('data', 'lucas-esdac')
+    climate_data_file = os.path.join('data',
+                                     'lucas_climate_data',
+                                     'lucas_climate_data.csv')
+    importer = LucasDataImporter(data_folder,
+                                 climate_data_file)
+    data = importer.run()
+    output_folder = 'output'
     figures_folder = os.path.join(
-        'figures', 'pedoclimatic_clustering_evaluation')
+        output_folder,
+        'pedoclimatic_clustering_evaluation'
+    )
     os.makedirs(figures_folder, exist_ok=True)
-
-    data = get_lucas_data(data_folder)
 
     # ----- Agglomerative clustering -----
     ac_clustering_method_climate = AgglomerativeClustering
@@ -268,7 +283,7 @@ if __name__ == "__main__":
     ac_n_clusters = range(3, 20)
     ac_figures_folder = os.path.join(
         figures_folder, 'agglomerative_clustering')
-    _ = PedoclimaticClusteringAnalyis(
+    _ = PedoclimaticClusteringEvaluation(
         ac_clustering_method_climate,
         ac_clustering_method_soil,
         ac_kwargs_clustering_climate,
@@ -284,7 +299,7 @@ if __name__ == "__main__":
     gm_kwargs_clustering_soil = {"covariance_type": "full"}
     gm_n_clusters = range(3, 20)
     gm_figures_folder = os.path.join(figures_folder, 'gaussian_mixture')
-    _ = PedoclimaticClusteringAnalyis(
+    _ = PedoclimaticClusteringEvaluation(
         gm_clustering_method_climate,
         gm_clustering_method_soil,
         gm_kwargs_clustering_climate,

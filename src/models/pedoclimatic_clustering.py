@@ -1,25 +1,15 @@
+from sklearn.metrics import silhouette_score, davies_bouldin_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import mixture
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import StandardScaler
 import os
 
 import pandas as pd
-import geopandas as gpd
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import AgglomerativeClustering
-from sklearn import mixture
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import silhouette_score, davies_bouldin_score
+pd.options.mode.chained_assignment = 'raise'
 
 
-def get_lucas_data(data_folder, file_name='selected_lucas_data.csv'):
-    data = pd.read_csv(os.path.join(data_folder, file_name))
-    data['geometry'] = gpd.GeoSeries.from_wkt(data['geometry'])
-    data = gpd.GeoDataFrame(data, geometry='geometry')
-    data = data.set_crs("EPSG:4326")
-    data["lat"] = data.geometry.y
-    data["lon"] = data.geometry.x
-    return data
-
-
-class CarbonContextualizer:
+class PedoclimaticClustering:
 
     def __init__(
         self,
@@ -48,7 +38,7 @@ class CarbonContextualizer:
             "pre_sum",
             "aridity_sum",
         ]
-        self.features_soil = ["clay_2009", "sand_2009", "CaCO3_2015"]
+        self.features_soil = ["clay", "sand", "CaCO3"]
         self.clustering_method_climate = clustering_method_climate
         self.clustering_method_soil = clustering_method_soil
         self.n_clusters_climate = n_clusters_climate
@@ -120,17 +110,22 @@ class CarbonContextualizer:
         data = self.data
         if not hasattr(self.model_climate, "predict"):
             clusters_climate = self.model_climate.labels_
-            data["Cluster_climate"] = clusters_climate
+            data.loc[:, "Cluster_climate"] = clusters_climate
         else:
             clusters_climate = self.model_climate.predict(self.X_climate)
-            data["Cluster_climate"] = clusters_climate
+            data.loc[:, "Cluster_climate"] = clusters_climate
 
         if not hasattr(self.model_soil, "predict"):
             clusters_soil = self.model_soil.labels_
-            data["Cluster_soil"] = clusters_soil
+            data.loc[:, "Cluster_soil"] = clusters_soil
         else:
             clusters_soil = self.model_soil.predict(self.X_soil)
-            data["Cluster_soil"] = clusters_soil
+            data.loc[:, "Cluster_soil"] = clusters_soil
+
+        data.loc[:, "cluster"] = data.apply(
+            lambda x: "-".join([str(x.Cluster_climate), str(x.Cluster_soil)]),
+            axis=1
+        )
 
         return data
 

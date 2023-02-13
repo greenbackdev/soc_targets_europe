@@ -1,20 +1,20 @@
+import geopandas as gpd
 import os
 
 import numpy as np
 import pandas as pd
-import geopandas as gpd
+pd.options.mode.chained_assignment = 'raise'
 
 
 class LucasDataImporter:
 
-    def __init__(self, lucas_data_folder, climate_data_file, output_folder):
+    def __init__(self, lucas_data_folder, climate_data_file):
         self.lucas_data_folder = lucas_data_folder
         self.climate_data_file = climate_data_file
-        self.output_folder = output_folder
         self.features_soil = [
-            "clay_2009",
-            "sand_2009",
-            "CaCO3_2015"
+            "clay",
+            "sand",
+            "CaCO3"
         ]
         self.features_climate = [
             "tmp_mean",
@@ -26,15 +26,20 @@ class LucasDataImporter:
     def _get_lucas_data(self):
         # Load LUCAS 2009 data
         lucas2009_metadata = pd.read_csv(
-            os.path.join(self.lucas_data_folder,
-                         "LUCAS_Micro_data/EU_2009_20200213.CSV")
+            os.path.join(
+                self.lucas_data_folder,
+                "LUCAS_Micro_data/EU_2009_20200213.CSV"
+            ),
+            low_memory=False
         )
         lucas2009_gdf = gpd.read_file(
             os.path.join(
-                self.lucas_data_folder, "LUCAS TopSoil 2009/package-for-ESDAC-20190927/SoilAttr_LUCAS2009/SoilAttr_LUCAS2009.shp")
+                self.lucas_data_folder,
+                "LUCAS TopSoil 2009/package-for-ESDAC-20190927/SoilAttr_LUCAS2009/SoilAttr_LUCAS2009.shp"
+            )
         )
         lucas2009_gdf["has_soil"] = True
-        lucas2009_metadata["has_metadata"] = True
+        lucas2009_metadata.loc[:, "has_metadata"] = True
         lucas2009_gdf = pd.merge(
             lucas2009_gdf, lucas2009_metadata, on="POINT_ID", how="inner"
         )
@@ -42,14 +47,17 @@ class LucasDataImporter:
 
         # Add Bulgaria and Romania, Malta and Cyprus (2012)
         lucas2012_metadata = pd.read_csv(
-            os.path.join(self.lucas_data_folder,
-                         "LUCAS_Micro_data/EU_2012_20200213.CSV")
+            os.path.join(
+                self.lucas_data_folder,
+                "LUCAS_Micro_data/EU_2012_20200213.CSV"
+            ),
+            low_memory=False
         )
         lucas2012_metadata = lucas2012_metadata.drop(
             lucas2012_metadata[lucas2012_metadata.POINT_ID == '270.272 rows selected.'].index)
-        lucas2012_metadata['POINT_ID'] = lucas2012_metadata['POINT_ID'].astype(
+        lucas2012_metadata.loc[:, 'POINT_ID'] = lucas2012_metadata['POINT_ID'].astype(
             float)
-        lucas2012_metadata["has_metadata"] = True
+        lucas2012_metadata.loc[:, "has_metadata"] = True
         lucas2012_BG_RO_gdf = gpd.read_file(
             os.path.join(
                 self.lucas_data_folder, "LUCAS TopSoil 2009/package-for-ESDAC-20190927/SoilAttr_BG_RO/SoilAttr_LUCAS_2012_BG_RO.shp")
@@ -91,8 +99,11 @@ class LucasDataImporter:
 
         # Load LUCAS 2015 data
         lucas2015_metadata = pd.read_csv(
-            os.path.join(self.lucas_data_folder,
-                         "LUCAS_Micro_data/EU_2015_20200225.CSV")
+            os.path.join(
+                self.lucas_data_folder,
+                "LUCAS_Micro_data/EU_2015_20200225.CSV"
+            ),
+            low_memory=False
         )
         lucas2015_metadata = lucas2015_metadata[
             ~lucas2015_metadata.POINT_ID.isna()
@@ -111,7 +122,7 @@ class LucasDataImporter:
                 self.lucas_data_folder, "LUCAS TopSoil 2015/LUCAS2015_topsoildata_20200323/LUCAS_Topsoil_2015_20200323-shapefile/LUCAS_Topsoil_2015_20200323.shp")
         )
         lucas2015_gdf["has_soil"] = True
-        lucas2015_metadata["has_metadata"] = True
+        lucas2015_metadata.loc[:, "has_metadata"] = True
         lucas2015_gdf = gpd.GeoDataFrame(lucas2015_gdf)
         lucas2015_gdf = pd.merge(
             lucas2015_gdf,
@@ -150,8 +161,7 @@ class LucasDataImporter:
 
         return lucas_gdf
 
-    def preprocess_lucas_data(self):
-        data = self.data
+    def _preprocess_lucas_data(self, data):
         data.POINT_ID = data.POINT_ID.astype(int)
 
         # drop two sites that share the same POINT_ID
@@ -173,30 +183,29 @@ class LucasDataImporter:
         data["silt_2009"].replace(np.float64(-999), np.nan, inplace=True)
         data["sand_2009"].replace(np.float64(-999), np.nan, inplace=True)
         data["pHinH2O_2009"].replace(np.float64(-999), np.nan, inplace=True)
-        data[data.filter(regex="GPS_LAT_.*").columns].replace(
+        data.loc[:, data.filter(regex="GPS_LAT_.*").columns].replace(
             88.888888, np.nan, inplace=True
         )
-        data[data.filter(regex="GPS_LONG_.*").columns].replace(
+        data.loc[:, data.filter(regex="GPS_LONG_.*").columns].replace(
             88.888888, np.nan, inplace=True
         )
-        data[data.filter(regex="OBS_DIST_.*").columns].replace(
+        data.loc[:, data.filter(regex="OBS_DIST_.*").columns].replace(
             8888, np.nan, inplace=True
         )
-        data[data.filter(regex="OBS_DIST_.*").columns].replace(
+        data.loc[:, data.filter(regex="OBS_DIST_.*").columns].replace(
             -1, np.nan, inplace=True
         )
-        data[data.filter(regex="GPS_PREC_.*").columns].replace(
+        data.loc[:, data.filter(regex="GPS_PREC_.*").columns].replace(
             8888, np.nan, inplace=True
         )
         data.Country_2009 = data.Country_2009.str.upper()
 
         # get lat and lon from geometry
-        data["lon"] = data["geometry"].x
-        data["lat"] = data["geometry"].y
+        data.loc[:, "lon"] = data["geometry"].x
+        data.loc[:, "lat"] = data["geometry"].y
         return data
 
-    def select_lucas_data(self):
-        data = self.data
+    def _select_lucas_data(self, data):
 
         # step 1: texture consistency between 2009 and 2015
         data = data.drop(
@@ -229,11 +238,33 @@ class LucasDataImporter:
             )
         ]
 
+        # annotate lat and lon
+        data.loc[:, "lat"] = data.geometry.y
+        data.loc[:, "lon"] = data.geometry.x
+
+        # calculate C:N ratio
+        data.loc[:, "C/N"] = data.OC_2015 / data.N_2015
+
+        data.rename(
+            {
+                "clay_2009": "clay",
+                "sand_2009": "sand",
+                "silt_2009": "silt",
+                "CaCO3_2015": "CaCO3",
+                "OC_2015": "toc"
+            },
+            axis=1,
+            inplace=True
+        )
+
         return data
 
     def _add_climate_data(self, data):
 
-        climate_data = pd.read_csv(os.path.join(self.climate_data_file))
+        climate_data = pd.read_csv(
+            os.path.join(self.climate_data_file),
+            low_memory=False
+        )
         data = data.merge(climate_data, on='POINT_ID')
 
         return data
@@ -246,15 +277,11 @@ class LucasDataImporter:
 
         return data
 
-    def _save_data(self, data):
-        data.to_csv(os.path.join(self.output_folder,
-                    '_selected_lucas_data.csv'),
-                    index=False)
-
     def run(self):
         data = self._get_lucas_data()
+        data = self._preprocess_lucas_data(data)
+        data = self._select_lucas_data(data)
         data = self._add_climate_data(data)
         data = self._select_clustering_data(data)
-        self._save_data(data)
 
         return data

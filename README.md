@@ -113,26 +113,51 @@ Georgiou, Katerina, et al. ["Global stocks and capacity of mineral-associated so
 
 The original data are available at https://doi.org/10.5281/zenodo.6539765.
 
+### Land use data by NUTS 2 regions
+
+```
+data/Main farm land use by NUTS 2 regions
+├── ef_lus_main__custom_3779332_page_spreadsheet.xlsx
+└── extract.csv
+```
+
+The original data `ef_lus_main__custom_3779332_page_spreadsheet.xlsx` can be downloaded from [Eurostat](https://ec.europa.eu/eurostat/databrowser/view/EF_LUS_MAIN__custom_3779332/default/table?lang=en). The file `extract.csv` is an extract of the data that contains three columns: `Country`, `Arable land`, `Permanent crops` (see `Sheet 1` in `ef_lus_main__custom_3779332_page_spreadsheet.xlsx`).
+
+
 ## Scripts
 
-Run scripts using
+Run scripts in the correct order by using
 ```
-pipenv run python <script.py>
+pipenv run python src/evaluate_pedoclimatic_clustering.py
+
+pipenv run python src/run_pedoclimatic_clustering.py
+pipenv run python src/run_natural_references_per_pedoclimate.py
+pipenv run python src/run_data_driven_reciprocal_modelling.py
+pipenv run python src/run_carbon_landscape_zones.py
+pipenv run python src/run_maom_capacity.py
+
+pipenv run python src/run_methods_comparison.py
 ```
 
-Available scripts:
+Scripts description:
 - `evaluate_pedoclimatic_clustering.py`: performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian Mixtures with 3 to 19 clusters. Plots:
     - clustering metrics;
     - maps of the climate clusters;
     - statistics of carbonates in the soil clusters;
     - texture triangles for the soil clusters.
 
-- `run_pedoclimatic_clustering.py`: #TODO
+- `run_pedoclimatic_clustering.py`: Performs Pedoclimatic Clustering of LUCAS sites using
+    - Agglomerative Clustering for soil clustering (4 clusters);
+    - Gaussian Mixture for climate clustering (11 clusters).
 
-- `run_natural_references_per_pedoclimate.py`: #TODO
+    Saves results to `output/pedoclimatic_clustering`.
 
-- `run_carbon_landscape_zones.py` #TODO
+- `run_natural_references_per_pedoclimate.py`: NRpPc - Calculates SOC reference values for each pedoclimatic cluster (output of run_pedoclimatic_clustering.py) using natural references (grasslands and woodlands). Selects only data that did not change land cover between 2009 and 2015.
 
-- `run_data_driven_reciprocal_modelling.py` #TODO
+- `run_data_driven_reciprocal_modelling.py`: DDRM - Gets SOC reference values from the Data-driven reciprocal modelling output.
 
-- `run_maom_capacity.py` #TODO
+- `run_carbon_landscape_zones.py`: CLZs - Calculates SOC reference values for each carbon landscape zone using croplands as references. Selects only data that did not change land cover between 2009 and 2015 and that are in the features space of the data-driven reciprocal modelling.
+
+- `run_maom_capacity.py`: Gets SOC reference values from the MaOM capacity output.
+
+- `run_methods_comparison`: compares the four approaches, computes the ensemble modelling (median of the results of NRpPc, DDRM, CLZs), produces plots and maps.
