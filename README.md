@@ -10,13 +10,17 @@ Submitted to xxx in date xxx
 
 Requires Python 3.9. For the packages requirements, see `Pipfile`.
 
-```
-pip install pipenv
-````
+## Setup
 
 ```
-pipenv install
+make setup
 ```
+or
+
+```
+pip install pipenv
+pipenv install
+````
 
 ## Necessary files to be included in `data/`
 
@@ -124,38 +128,39 @@ data/Main farm land use by NUTS 2 regions
 The original data `ef_lus_main__custom_3779332_page_spreadsheet.xlsx` can be downloaded from [Eurostat](https://ec.europa.eu/eurostat/databrowser/view/EF_LUS_MAIN__custom_3779332/default/table?lang=en). The file `extract.csv` is an extract of the data that contains three columns: `Country`, `Arable land`, `Permanent crops` (see `Sheet 1` in `ef_lus_main__custom_3779332_page_spreadsheet.xlsx`).
 
 
-## Scripts
+## Run
 
-Run scripts in the correct order by using
+### Pedoclimatic Clustering evaluation
+
+To perform the Pedoclimatic Clustering evolatuation, type:
 ```
-pipenv run python src/evaluate_pedoclimatic_clustering.py
-
-pipenv run python src/run_pedoclimatic_clustering.py
-pipenv run python src/run_natural_references_per_pedoclimate.py
-pipenv run python src/run_data_driven_reciprocal_modelling.py
-pipenv run python src/run_carbon_landscape_zones.py
-pipenv run python src/run_maom_capacity.py
-
-pipenv run python src/run_methods_comparison.py
+make evaluate_pedoclimatic_clustering
 ```
-
-Scripts description:
-- `evaluate_pedoclimatic_clustering.py`: performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian Mixtures with 3 to 19 clusters. Plots:
+It performs Pedoclimatic Clustering using Agglomerative Clustering and Gaussian Mixtures with 3 to 19 clusters.
+It plots:
     - clustering metrics;
     - maps of the climate clusters;
     - statistics of carbonates in the soil clusters;
     - texture triangles for the soil clusters.
 
-- `run_pedoclimatic_clustering.py`: Performs Pedoclimatic Clustering of LUCAS sites using
+### Ensemble modelling and methods comparison
+
+To compute the refrence values using the four methods (Natural References per Pedoclimate, Data-driven Reciprocal Modelling, Carbon Landscape Zones and MaOM capacity), compute the ensemble modelling (median of the first three methods) and produce the corresponding maps, type:
+
+```
+make run_ensemble
+```
+
+It performs the following computations:
+
+- `compute_pedoclimatic_clusters`: Performs Pedoclimatic Clustering of LUCAS sites using
     - Agglomerative Clustering for soil clustering (4 clusters);
     - Gaussian Mixture for climate clustering (11 clusters).
 
-- `run_natural_references_per_pedoclimate.py`: NRpPc - Calculates SOC reference values for each pedoclimatic cluster (output of run_pedoclimatic_clustering.py) using natural references (grasslands and woodlands). Selects only data that did not change land cover between 2009 and 2015.
+- `compute_natural_references_per_pedoclimate`: NRpPc - Calculates SOC reference values for each pedoclimatic cluster using natural references (grasslands and woodlands). Selects only data that did not change land cover between 2009 and 2015.
 
-- `run_data_driven_reciprocal_modelling.py`: DDRM - Gets SOC reference values from the Data-driven reciprocal modelling output.
+- `compute_data_driven_reciprocal_modelling`: DDRM - Gets SOC reference values from the Data-driven reciprocal modelling output.
 
-- `run_carbon_landscape_zones.py`: CLZs - Calculates SOC reference values for each carbon landscape zone using croplands as references. Selects only data that did not change land cover between 2009 and 2015 and that are in the features space of the data-driven reciprocal modelling.
+- `compute_carbon_landscape_zones`: CLZs - Calculates SOC reference values for each carbon landscape zone using croplands as references. Selects only data that did not change land cover between 2009 and 2015 and that are in the features space of the data-driven reciprocal modelling.
 
-- `run_maom_capacity.py`: Gets SOC reference values from the MaOM capacity output.
-
-- `run_methods_comparison`: compares the four approaches, computes the ensemble modelling (median of the results of NRpPc, DDRM, CLZs), produces plots and maps.
+- `compute_maom_capacity`: Gets SOC reference values from the MaOM capacity output.
