@@ -17,6 +17,12 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = 'raise'
 
+# plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({
+    "figure.facecolor":  (1.0, 1.0, 1.0, 1.0),  # white
+    "axes.facecolor":    (1.0, 1.0, 1.0, 1.0),  # white
+    "savefig.facecolor": (1.0, 1.0, 1.0, 0.0),  # transparent
+})
 
 output_folder = 'output'
 os.makedirs(output_folder, exist_ok=True)
@@ -90,8 +96,9 @@ cbar.ax.yaxis.set_ticks_position('left')
 cbar.ax.yaxis.set_label_position('left')
 cbar.ax.set_ylabel("SOC [gC/kg]", fontsize=16)
 
-plt.suptitle(f"Cluster {cc}-{cs}", y=0.95, fontsize=18)
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure6.pdf'))
+plt.suptitle(f"Cluster {cc}-{cs}", y=0.95, fontsize=28)
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure6.png'),
+            format='png', dpi=600)
 plt.close()
 
 
@@ -179,7 +186,8 @@ ax.set_title("Reference value per cluster")
 ax.grid()
 plt.legend(title='Percentile')
 plt.tight_layout()
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure3.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure3.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Use median as percentile

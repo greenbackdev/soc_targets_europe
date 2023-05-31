@@ -16,6 +16,12 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = 'raise'
 
+# plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({
+    "figure.facecolor":  (1.0, 1.0, 1.0, 1.0),  # white
+    "axes.facecolor":    (1.0, 1.0, 1.0, 1.0),  # white
+    "savefig.facecolor": (1.0, 1.0, 1.0, 0.0),  # transparent
+})
 
 output_folder = 'output'
 os.makedirs(output_folder, exist_ok=True)
@@ -179,7 +185,8 @@ ax.set_title("Reference value per Carbon Landscape Zone")
 ax.grid()
 plt.legend(title='Percentile')
 plt.tight_layout()
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure4B.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure4B.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Use 0.9 as percentile
@@ -200,7 +207,6 @@ cmap = 'rainbow'
 
 fig, ax = plt.subplots(1, 1, figsize=(10, 10))
 
-ax = ax
 europe[europe.name != "Russia"].geometry.boundary.plot(
     ax=ax, linewidth=1, facecolor='gray', alpha=0.1, color='black')
 ax.set_xlim(-15, 40)
@@ -209,7 +215,9 @@ ax.set_ylim(32, 75)
 data.plot('CLZs', markersize=3, ax=ax, legend=True,
           categorical=True, cmap=clusters_cmap_clz)
 
-plt.savefig(os.path.join(figures_folder, 'figure1B.pdf'))
+plt.tight_layout()
+plt.savefig(os.path.join(figures_folder, 'figure1B.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Supplementary Figure 2B
@@ -223,12 +231,13 @@ for clz in clz_labels:
                     color=cluster_colors_clz[clz], label=clz, marker='o')
 
 ax.set_xlim(0, 120)
-ax.set_xlabel("SOC", fontsize=18)
-ax.set_ylabel("P(SOC)", fontsize=18)
-ax.set_title('Carbon Landscape Zones', fontsize=18)
+ax.set_xlabel("SOC", fontsize=28)
+ax.set_ylabel("P(SOC)", fontsize=28)
+ax.set_title('Carbon Landscape Zones', fontsize=28)
 ax.legend(fontsize=16, ncol=2)
 
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2B.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2B.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Supplementary Figure 4C
@@ -257,7 +266,8 @@ for ax, col in zip(axs.flatten(), [
     data.plot(col, markersize=3, ax=ax, legend=True, cmap=cmap)
     ax.set_title(col.replace('.', ' '))
 
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure4C.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure4C.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Save results

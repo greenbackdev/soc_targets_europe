@@ -1,6 +1,6 @@
 """
 Compares the four approaches,
-computes the ensemble modelling (median of the results of NRpPc, DDRM, CLZs),
+computes the ensemble modelling (median of the results of NRP, DDRM, CLZs),
 produces plots and maps.
 """
 
@@ -17,6 +17,12 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = 'raise'
 
+# plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({
+    "figure.facecolor":  (1.0, 1.0, 1.0, 1.0),  # white
+    "axes.facecolor":    (1.0, 1.0, 1.0, 1.0),  # white
+    "savefig.facecolor": (1.0, 1.0, 1.0, 0.0),  # transparent
+})
 
 output_folder = 'output'
 os.makedirs(output_folder, exist_ok=True)
@@ -135,7 +141,7 @@ data.loc[:, 'deltastock_median'] = data.filter(
 
 
 def get_intermediate_method(x):
-    names = ['NRpPc', 'DDRM', 'CLZs']
+    names = ['NRP', 'DDRM', 'CLZs']
     vrefs = x[['vref_nrppc', 'vref_ddrm', 'vref_clz']]
     intermediate = names[np.argsort(vrefs)[len(vrefs)//2]]
     return intermediate
@@ -161,7 +167,7 @@ colors = plt.cm.get_cmap(cmap, 8)
 cmap = ListedColormap([colors(i) for i in range(3)])
 
 data.plot('intermediate_method', markersize=1, ax=ax, legend=True,
-          cmap=cmap, categories=['NRpPc', 'DDRM', 'CLZs'])
+          cmap=cmap, categories=['NRP', 'DDRM', 'CLZs'])
 
 left, bottom, width, height = [0.28, 0.7, 0.18, 0.15]
 ax2 = fig.add_axes([left, bottom, width, height])
@@ -170,7 +176,8 @@ ax2.set_xlabel('')
 for i in range(3):
     ax2.patches[i].set_facecolor(colors(i))
 
-plt.savefig(os.path.join(figures_folder, 'figure6E.pdf'))
+plt.savefig(os.path.join(figures_folder, 'figure6E.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Analyze results
@@ -209,7 +216,8 @@ axs[1][0].set_ylabel('Pedoclimatic cluster')
 axs[0][0].legend(loc='upper right')
 
 plt.tight_layout()
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure5.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure5.png'),
+            format='png', dpi=600)
 plt.close()
 
 # Correlation between reference values
@@ -293,7 +301,7 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         if annotate_sum:
             box_text += f"\nSum: {sum:.0f} {unit_measure}"
         text_box = AnchoredText(box_text, frameon=True,
-                                loc=2, pad=0.5, prop=dict(fontsize=18))
+                                loc=2, pad=0.5, prop=dict(fontsize=28))
         plt.setp(text_box.patch, facecolor='white', alpha=0.9)
         ax.add_artist(text_box)
 
@@ -309,7 +317,7 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
     if median_only:
         data.plot(f'{variable}_median', markersize=markersize,
                   ax=axs, norm=norm, cmap=cmap)
-        axs.set_title("Median", fontsize=18)
+        axs.set_title("Median", fontsize=28)
 
         if annotate:
             add_textbox('_median', axs)
@@ -323,16 +331,16 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         data.plot(f'{variable}_nrppc', markersize=markersize,
                   ax=axs[0], norm=norm, cmap=cmap)
         axs[0].set_title(
-            "Natural references per pedoclimate (median)", fontsize=18)
+            "Natural references per pedoclimate", fontsize=28)
 
         data.plot(f'{variable}_ddrm', markersize=markersize,
                   ax=axs[1], norm=norm, cmap=cmap)
-        axs[1].set_title("Data-driven reciprocal modeling", fontsize=18)
+        axs[1].set_title("Data-driven reciprocal modeling", fontsize=28)
 
         data.plot(f'{variable}_clz', markersize=markersize,
                   ax=axs[2], norm=norm, cmap=cmap)
         axs[2].set_title(
-            "Carbon Landscape Zones (90th percentile)", fontsize=18)
+            "Carbon Landscape Zones", fontsize=28)
 
         if annotate:
             add_textbox('_nrppc', axs[0])
@@ -342,7 +350,7 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         if with_maom_capacity:
             data.plot(f'{variable}_maom', markersize=markersize,
                       ax=axs[3], norm=norm, cmap=cmap)
-            axs[3].set_title("MaOM capacity", fontsize=18)
+            axs[3].set_title("MaOM capacity", fontsize=28)
 
             if annotate:
                 add_textbox('_maom', axs[3])
@@ -350,7 +358,7 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         if with_median:
             data.plot(f'{variable}_median', markersize=markersize,
                       ax=axs[3], norm=norm, cmap=cmap)
-            axs[3].set_title("Median", fontsize=18)
+            axs[3].set_title("Median", fontsize=28)
 
             if annotate:
                 add_textbox('_median', axs[3])
@@ -363,7 +371,10 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
             ax.set_ylim(ylim)
 
     # Add colorbar
-    cax = fig.add_axes([0.95, 0.17, 0.02, 0.65])
+    if median_only:
+        cax = fig.add_axes([0.93, 0.17, 0.02, 0.65])
+    else:
+        cax = fig.add_axes([0.95, 0.17, 0.02, 0.65])
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm._A = []
     cbar = fig.colorbar(sm, cax=cax)
@@ -378,10 +389,16 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
 
     cbar.ax.yaxis.set_ticks(bounds)
     cbar.ax.yaxis.set_ticks_position('left')
-    cbar.ax.yaxis.set_label_position('left')
-    cbar.ax.set_ylabel(title, fontsize=18)
+    if median_only:
+        cbar.ax.tick_params(labelsize=20)
+        cbar.ax.yaxis.set_label_position('right')
+        cbar.ax.set_ylabel(title, fontsize=22)
+    else:
+        cbar.ax.tick_params(labelsize=24)
+        cbar.ax.yaxis.set_label_position('left')
+        cbar.ax.set_ylabel(title, fontsize=26)
 
-    plt.savefig(file_path)
+    plt.savefig(file_path, format='png', dpi=600)
     plt.close()
 
 
@@ -428,7 +445,7 @@ def plot_difference_map(data, variable, file_path, variable_name=None, higher_be
         std = datadiff[variable].std()
         box_text = f"Median: {median:.2f} {unit_measure}\nMean: {mean:.2f} {unit_measure}\nStd: {std:.2f} {unit_measure}"
         text_box = AnchoredText(box_text, frameon=True,
-                                loc=2, pad=0.5, prop=dict(fontsize=18))
+                                loc=2, pad=0.5, prop=dict(fontsize=28))
         plt.setp(text_box.patch, facecolor='white', alpha=0.9)
         ax.add_artist(text_box)
 
@@ -446,17 +463,17 @@ def plot_difference_map(data, variable, file_path, variable_name=None, higher_be
     datadiff12.plot(variable, markersize=markersize,
                     ax=axs[0], norm=norm, cmap=cmap)
     axs[0].set_title(
-        f"{variable_name}(NRpPc) - {variable_name}(DDRM)", fontsize=18)
+        f"{variable_name}(NRP) - {variable_name}(DDRM)", fontsize=28)
 
     datadiff13.plot(variable, markersize=markersize,
                     ax=axs[1], norm=norm, cmap=cmap)
     axs[1].set_title(
-        f"{variable_name}(NRpPc) - {variable_name}(CLZs)", fontsize=18)
+        f"{variable_name}(NRP) - {variable_name}(CLZs)", fontsize=28)
 
     datadiff23.plot(variable, markersize=markersize,
                     ax=axs[2], norm=norm, cmap=cmap)
     axs[2].set_title(
-        f"{variable_name}(DDRM) - {variable_name}(CLZs)", fontsize=18)
+        f"{variable_name}(DDRM) - {variable_name}(CLZs)", fontsize=28)
 
     if annotate:
         add_textbox(datadiff12, axs[0])
@@ -486,10 +503,11 @@ def plot_difference_map(data, variable, file_path, variable_name=None, higher_be
 
     cbar.ax.yaxis.set_ticks(bounds)
     cbar.ax.yaxis.set_ticks_position('left')
+    cbar.ax.tick_params(labelsize=24)
     cbar.ax.yaxis.set_label_position('left')
-    cbar.ax.set_ylabel(title, fontsize=18)
+    cbar.ax.set_ylabel(title, fontsize=26)
 
-    plt.savefig(file_path)
+    plt.savefig(file_path, format='png', dpi=600)
     plt.close()
 
 
@@ -497,7 +515,7 @@ plot_map(
     data,
     'vref',
     os.path.join(figures_folder,
-                 'figure3top.pdf'),
+                 'figure3top.png'),
     variable_name='SOCref',
     higher_better=False,
     unit_measure='gC/kg',
@@ -510,7 +528,7 @@ plot_map(
     data,
     'vref',
     os.path.join(figures_folder,
-                 'figure6A.pdf'),
+                 'figure6A.png'),
     variable_name='SOCref',
     higher_better=False,
     unit_measure='gC/kg',
@@ -524,7 +542,7 @@ plot_difference_map(
     data,
     'vref',
     os.path.join(figures_folder,
-                 'figure5.pdf'),
+                 'figure5.png'),
     variable_name='SOCref',
     higher_better=False,
     unit_measure='gC/kg',
@@ -537,7 +555,7 @@ plot_map(
     data,
     'deltatoc',
     os.path.join(figures_folder,
-                 'figure4top.pdf'),
+                 'figure4top.png'),
     variable_name='ΔSOC',
     higher_better=False,
     unit_measure='gC/kg',
@@ -550,7 +568,7 @@ plot_map(
     data,
     'deltatoc',
     os.path.join(figures_folder,
-                 'figure6C.pdf'),
+                 'figure6C.png'),
     variable_name='ΔSOC',
     higher_better=False,
     unit_measure='gC/kg',
@@ -564,7 +582,7 @@ plot_map(
     data,
     'vref_stock',
     os.path.join(figures_folder,
-                 'figure3bottom.pdf'),
+                 'figure3bottom.png'),
     variable_name='SOCref',
     higher_better=False,
     unit_measure='Mg/ha',
@@ -578,7 +596,7 @@ plot_map(
     data,
     'vref_stock',
     os.path.join(figures_folder,
-                 'figure6B.pdf'),
+                 'figure6B.png'),
     variable_name='SOCref',
     higher_better=False,
     unit_measure='Mg/ha',
@@ -592,7 +610,7 @@ plot_map(
     data,
     'deltastock',
     os.path.join(figures_folder,
-                 'figure4bottom.pdf'),
+                 'figure4bottom.png'),
     variable_name='ΔSOC',
     higher_better=False,
     unit_measure='Mg/ha',
@@ -606,7 +624,7 @@ plot_map(
     data,
     'deltastock',
     os.path.join(figures_folder,
-                 'figure6D.pdf'),
+                 'figure6D.png'),
     variable_name='ΔSOC',
     higher_better=False,
     unit_measure='Mg/ha',
@@ -662,7 +680,8 @@ data[(data.sand > 80) & (data["C/N"] > 13)].plot(markersize=1,
                                                  ax=ax, color='black', label='Black sands')
 
 ax.legend()
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure7.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure7.png'),
+            format='png', dpi=600)
 plt.close()
 
 print('N. black sands = ', data[(data.sand > 80)

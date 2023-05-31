@@ -5,6 +5,8 @@ Performs Pedoclimatic Clustering of LUCAS sites using
 Saves results to output/pedoclimatic_clustering.
 """
 
+from models.pedoclimatic_clustering import PedoclimaticClustering
+from importers.lucas_importer import LucasDataImporter
 import os
 import pickle
 import geopandas as gpd
@@ -14,8 +16,13 @@ import seaborn as sns
 import plotly.express as px
 import matplotlib.pyplot as plt
 
-from importers.lucas_importer import LucasDataImporter
-from models.pedoclimatic_clustering import PedoclimaticClustering
+# plt.rcParams.update({'font.size': 22})
+plt.rcParams.update({
+    "figure.facecolor":  (1.0, 1.0, 1.0, 1.0),  # white
+    "axes.facecolor":    (1.0, 1.0, 1.0, 1.0),  # white
+    "savefig.facecolor": (1.0, 1.0, 1.0, 0.0),  # transparent
+})
+
 
 lucas_data_folder = os.path.join('data', 'lucas-esdac')
 climate_data_file = os.path.join('data',
@@ -118,15 +125,15 @@ for ax in axs:
     ax.set_xlim(-15, 40)
     ax.set_ylim(32, 75)
 
-data.plot('Cluster_climate', markersize=3,
-          ax=axs[0], legend=True, categorical=True, cmap=clusters_cmap_climate)
-axs[0].set_title("Cluster_climate")
+data.set_crs("EPSG:4326").plot('Cluster_climate', markersize=3,
+                               ax=axs[0], legend=True, categorical=True, cmap=clusters_cmap_climate)
 
-data.plot('Cluster_soil', markersize=3,
-          ax=axs[1], legend=True, categorical=True, cmap=clusters_cmap_soil)
-axs[1].set_title("Cluster_soil")
+data.set_crs("EPSG:4326").plot('Cluster_soil', markersize=3,
+                               ax=axs[1], legend=True, categorical=True, cmap=clusters_cmap_soil)
 
-plt.savefig(os.path.join(figures_folder, 'figure1A.pdf'))
+plt.tight_layout()
+plt.savefig(os.path.join(figures_folder, 'figure1A.png'),
+            format='png', dpi=600)
 plt.close()
 
 # figure 2
@@ -138,7 +145,7 @@ for c in cluster_labels_soil:
     fig.write_image(
         os.path.join(
             figures_folder,
-            f'figure2_{c}.pdf'
+            f'figure2_{c}.png'
         )
     )
 
@@ -163,10 +170,11 @@ for ax, lc in zip(axs, ['Cropland', 'Grassland', 'Woodland']):
                             color=cluster_colors_climate[cc], marker=cluster_marker_soil[cs], label="{0}-{1}".format(cc, cs))
 
     ax.set_xlim(0, 120)
-    ax.set_xlabel("SOC [gC/kg]", fontsize=18)
-    ax.set_ylabel("P(SOC)", fontsize=18)
-    ax.set_title(lc+'s', fontsize=18)
+    ax.set_xlabel("SOC [gC/kg]", fontsize=28)
+    ax.set_ylabel("P(SOC)", fontsize=28)
+    ax.set_title(lc+'s', fontsize=28)
     ax.legend(fontsize=16, ncol=2)
 
-plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2A.pdf'))
+plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2A.png'),
+            format='png', dpi=600)
 plt.close()

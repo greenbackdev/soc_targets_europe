@@ -106,8 +106,10 @@ class PedoclimaticClusteringEvaluation:
         plt.savefig(
             os.path.join(
                 figures_folder,
-                'clustering_evaluation_soil.pdf'
-            )
+                'clustering_evaluation_soil.png'
+            ),
+            format='png',
+            dpi=600
         )
         plt.close()
 
@@ -129,8 +131,10 @@ class PedoclimaticClusteringEvaluation:
         plt.savefig(
             os.path.join(
                 figures_folder,
-                'clustering_evaluation_climate.pdf'
-            )
+                'clustering_evaluation_climate.png'
+            ),
+            format='png',
+            dpi=600
         )
         plt.close()
 
@@ -157,15 +161,17 @@ class PedoclimaticClusteringEvaluation:
             ax.set_xlim(-15, 40)
             ax.set_ylim(32, 75)
 
-            df.plot('Cluster_climate', markersize=3, ax=ax,
-                    legend=True, categorical=True, cmap=clusters_cmap_climate_)
+            df.set_crs("EPSG:4326").plot('Cluster_climate', markersize=3, ax=ax,
+                                         legend=True, categorical=True, cmap=clusters_cmap_climate_)
 
             plt.tight_layout()
             plt.savefig(
                 os.path.join(
                     figures_folder,
-                    f'{len(cluster_labels_climate_)}_climate_clusters.pdf'
-                )
+                    f'{len(cluster_labels_climate_)}_climate_clusters.png'
+                ),
+                format='png',
+                dpi=600
             )
             plt.close()
 
@@ -202,8 +208,10 @@ class PedoclimaticClusteringEvaluation:
             plt.savefig(
                 os.path.join(
                     figures_folder,
-                    f'{len(cluster_labels_soil_)}_soil_clusters.pdf'
-                )
+                    f'{len(cluster_labels_soil_)}_soil_clusters.png'
+                ),
+                format='png',
+                dpi=600
             )
             plt.close()
 
@@ -223,7 +231,7 @@ class PedoclimaticClusteringEvaluation:
                 fig.write_image(
                     os.path.join(
                         figures_folder,
-                        f'{len(cluster_labels_soil_)}_soil_clusters-cluster_{c}.pdf'
+                        f'{len(cluster_labels_soil_)}_soil_clusters-cluster_{c}.png'
                     )
                 )
         return
