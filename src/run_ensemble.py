@@ -65,25 +65,8 @@ data_clz = pd.read_csv(
 data_clz.drop("toc", axis=1, inplace=True)
 data_clz.rename({'vref': 'vref_clz'}, axis=1, inplace=True)
 
-data_maom = pd.read_csv(
-    os.path.join(
-        'output',
-        'maom_capacity.csv'
-    ),
-    low_memory=False
-)
-data_maom.rename(
-    {
-        'vref_stock': 'vref_stock_maom',
-        'deltastock': 'deltastock_maom'
-    },
-    axis=1,
-    inplace=True
-)
-
 data = data_nrppc.merge(data_ddrm, on="POINT_ID", how="inner")
 data = data.merge(data_clz, on="POINT_ID", how="inner")
-data = data.merge(data_maom, on="POINT_ID", how="inner")
 
 data.loc[:, 'geometry'] = gpd.GeoSeries.from_wkt(data['geometry'])
 data = gpd.GeoDataFrame(data, geometry='geometry')
@@ -128,7 +111,6 @@ for suffix in ['nrppc', 'ddrm', 'clz']:
         data.toc_stock
 
 # Ensamble method: calculate median reference values
-# (not considering MaOM capacity)
 
 data.loc[:, 'vref_median'] = data.filter(
     regex='^vref(_nrppc|_ddrm|_clz)$', axis=1).median(axis=1)
@@ -188,9 +170,12 @@ fig, axs = plt.subplots(2, 2, figsize=(15, 15))
 groups = data.groupby(['Cluster_climate', 'Cluster_soil'])
 tot = groups.POINT_ID.count()
 
-methods = ['_nrppc', '_ddrm', '_clz', '_maom']
-names = ['Natural references per pedoclimate',
-         'Reciprocal modelling', 'Carbon landscape zones', 'MaOM capacity']
+methods = ['_nrppc', '_ddrm', '_clz']
+names = [
+    'Natural references per pedoclimate',
+    'Reciprocal modelling',
+    'Carbon landscape zones'
+]
 height = 0.7
 for ax, method, name in zip(axs.flatten(), methods, names):
     negative = data[(data[f'deltastock{method}'] < 0)].groupby(
@@ -215,6 +200,8 @@ axs[0][0].set_ylabel('Pedoclimatic cluster')
 axs[1][0].set_ylabel('Pedoclimatic cluster')
 axs[0][0].legend(loc='upper right')
 
+axs[1][1].axis('off')
+
 plt.tight_layout()
 plt.savefig(os.path.join(figures_folder, 'supplementaryfigure5.png'),
             format='png', dpi=600)
@@ -231,10 +218,10 @@ def correlate(df):
     return corrcoeff, pvalue
 
 
-corrcoeff_stock, pvalue_stock = correlate(data.filter(
-    regex='^vref_stock(_nrppc|_ddrm|_clz|_maom)$', axis=1))
+corrcoeff, pvalue = correlate(data.filter(
+    regex='^vref(_nrppc|_ddrm|_clz)$', axis=1))
 
-corrcoeff_stock.to_csv(
+corrcoeff.to_csv(
     os.path.join(tables_folder, 'table2.csv')
 )
 
@@ -243,7 +230,7 @@ corrcoeff_stock.to_csv(
 
 def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
              annotate=True, annotate_sum=False, unit_measure=None,
-             with_maom_capacity=False, vmin=None, vmax=None,
+             vmin=None, vmax=None,
              color_resolution=None, ncolors=10, extend='both',
              xlim=(-15, 40), ylim=(32, 75), with_median=False,
              median_only=False):
@@ -254,9 +241,6 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         if median_only:
             vmin = data.filter(
                 regex=f'^{variable}(_median)$', axis=1).min().min()
-        elif with_maom_capacity:
-            vmin = data.filter(
-                regex=f'^{variable}(_nrppc|_ddrm|_clz|_maom)$', axis=1).min().min()
         elif with_median:
             vmin = data.filter(
                 regex=f'^{variable}(_nrppc|_ddrm|_clz|_median)$', axis=1).min().min()
@@ -268,9 +252,6 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         if median_only:
             vmax = data.filter(
                 regex=f'^{variable}(_median)$', axis=1).max().max()
-        elif with_maom_capacity:
-            vmax = data.filter(
-                regex=f'^{variable}(_nrppc|_ddrm|_clz|_maom)$', axis=1).max().max()
         elif with_median:
             vmin = data.filter(
                 regex=f'^{variable}(_nrppc|_ddrm|_clz|_median)$', axis=1).max().max()
@@ -308,8 +289,6 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
     n_rows = 1
     if median_only:
         n_cols = 1
-    elif with_maom_capacity or with_median:
-        n_cols = 4
     else:
         n_cols = 3
     fig, axs = plt.subplots(n_rows, n_cols, figsize=(10 * n_cols, 10 * n_rows))
@@ -346,14 +325,6 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
             add_textbox('_nrppc', axs[0])
             add_textbox('_ddrm', axs[1])
             add_textbox('_clz', axs[2])
-
-        if with_maom_capacity:
-            data.plot(f'{variable}_maom', markersize=markersize,
-                      ax=axs[3], norm=norm, cmap=cmap)
-            axs[3].set_title("MaOM capacity", fontsize=28)
-
-            if annotate:
-                add_textbox('_maom', axs[3])
 
         if with_median:
             data.plot(f'{variable}_median', markersize=markersize,
@@ -586,7 +557,6 @@ plot_map(
     variable_name='SOCref',
     higher_better=False,
     unit_measure='Mg/ha',
-    with_maom_capacity=True,
     vmin=10,
     vmax=90,
     color_resolution=5
@@ -614,7 +584,6 @@ plot_map(
     variable_name='ΔSOC',
     higher_better=False,
     unit_measure='Mg/ha',
-    with_maom_capacity=True,
     vmin=0,
     vmax=50,
     color_resolution=5
@@ -634,10 +603,6 @@ plot_map(
     color_resolution=5
 )
 
-# France potential in Mt (MaOM capacity)
-print('France potential in Mt (MaOM capacity):', data.groupby(
-    'Country').median()['deltastock_maom']['France'] * (239395 * 100) * 1e-6)
-
 # Estimate European SOC storage
 
 land_cover_data = pd.read_csv(
@@ -654,7 +619,7 @@ cropland_ha = land_cover_data['Arable land'] + \
     land_cover_data['Permanent crops']
 
 deltastock_country = data.groupby('Country').median().filter(
-    regex='^deltastock(_nrppc|_ddrm|_clz|_maom|_median)$').multiply(cropland_ha, axis=0)
+    regex='^deltastock(_nrppc|_ddrm|_clz|_median)$').multiply(cropland_ha, axis=0)
 # Convert to Mt
 deltastock_country = deltastock_country.multiply(
     1e-6).rename({c: c+'_Mt' for c in deltastock_country.columns}, axis=1).dropna()

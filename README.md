@@ -1,10 +1,8 @@
-# Source code for "A new framework to estimate soil organic carbon content targets in European croplands."
+# Source code for "A new approach to estimate soil organic carbon content targets in European croplands."
 
 This repository contains the code associated to the publication "A new framework to estimate soil organic carbon content targets in European croplands."
 
 **Authors:** Lorenza Pacini, Pierre Arbelet, Songchao Chen, Aurélie Bacq-Labreuil, Christophe Calvaruso, Florian Schneider, Dominique Arrouays, Nicolas P.A. Saby, Lauric Cécillon, Pierre Barré.
-
-Submitted to xxx in date xxx
 
 ## Requirements
 
@@ -102,21 +100,6 @@ The following fields should be included:
 
  Climate data can be extracted from the [Climate Research Unit](https://catalogue.ceda.ac.uk/uuid/89e1e34ec3554dc98594a5732622bce9) dataset and NPP data can be extracted from [MODIS](https://developers.google.com/earth-engine/datasets/catalog/MODIS_006_MOD17A2H#description).
 
-
-### MaOM capacity
-
-```
-data/maom_capacity
-├── global_MOC.nc
-└── global_MOCmax.nc
-```
-
-Data provided by the authors of
-
-Georgiou, Katerina, et al. ["Global stocks and capacity of mineral-associated soil organic carbon."](https://doi.org/10.1038/s41467-022-31540-9) Nature communications 13.1 (2022): 3797.
-
-The original data are available at https://doi.org/10.5281/zenodo.6539765.
-
 ### Land use data by NUTS 2 regions
 
 ```
@@ -132,7 +115,7 @@ The original data `ef_lus_main__custom_3779332_page_spreadsheet.xlsx` can be dow
 
 ### Pedoclimatic Clustering evaluation
 
-To perform the Pedoclimatic Clustering evolatuation, type:
+To perform the Pedoclimatic Clustering evaluation, type:
 ```
 make evaluate_pedoclimatic_clustering
 ```
@@ -145,7 +128,7 @@ It plots:
 
 ### Ensemble modelling and methods comparison
 
-To compute the refrence values using the four methods (Natural References per Pedoclimate, Data-driven Reciprocal Modelling, Carbon Landscape Zones and MaOM capacity), compute the ensemble modelling (median of the first three methods) and produce the corresponding maps, type:
+To compute the refrence values using the three methods (Natural References per Pedoclimate, Data-driven Reciprocal Modelling, and Carbon Landscape Zones), compute the ensemble modelling (median of the three methods) and produce the corresponding maps, type:
 
 ```
 make run_ensemble
@@ -162,5 +145,3 @@ It performs the following computations:
 - `compute_data_driven_reciprocal_modelling`: DDRM - Gets SOC reference values from the Data-driven reciprocal modelling output.
 
 - `compute_carbon_landscape_zones`: CLZs - Calculates SOC reference values for each carbon landscape zone using croplands as references. Selects only data that did not change land cover between 2009 and 2015 and that are in the features space of the data-driven reciprocal modelling.
-
-- `compute_maom_capacity`: Gets SOC reference values from the MaOM capacity output.
