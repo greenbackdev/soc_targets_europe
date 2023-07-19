@@ -5,6 +5,7 @@ change land cover between 2009 and 2015 and that are in the
 features space of the data-driven reciprocal modelling.
 """
 
+from maps_tools import add_scalebar, add_north_arrow
 from models.carbon_landscape_zones import CarbonReferenceValuesComputer
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -212,8 +213,23 @@ europe[europe.name != "Russia"].geometry.boundary.plot(
 ax.set_xlim(-15, 40)
 ax.set_ylim(32, 75)
 
-data.plot('CLZs', markersize=3, ax=ax, legend=True,
-          categorical=True, cmap=clusters_cmap_clz)
+data.plot(
+    'CLZs',
+    markersize=3,
+    ax=ax,
+    legend=True,
+    legend_kwds={
+        'fontsize': 20,
+        'loc': 'lower right'
+    },
+    categorical=True,
+    cmap=clusters_cmap_clz
+)
+
+add_scalebar(ax)
+add_north_arrow(ax)
+ax.tick_params(axis='x', labelsize=18)
+ax.tick_params(axis='y', labelsize=18)
 
 plt.tight_layout()
 plt.savefig(os.path.join(figures_folder, 'figure1B.png'),
@@ -265,6 +281,17 @@ for ax, col in zip(axs.flatten(), [
 
     data.plot(col, markersize=3, ax=ax, legend=True, cmap=cmap)
     ax.set_title(col.replace('.', ' '))
+    add_scalebar(ax, fontsize=10)
+    add_north_arrow(
+        ax,
+        fontsize=10,
+        x=0.25,
+        y=0.1,
+        arrow_length=0.07,
+        width=1.5,
+        headwidth=5,
+        headlength=5
+    )
 
 plt.savefig(os.path.join(figures_folder, 'supplementaryfigure4C.png'),
             format='png', dpi=600)

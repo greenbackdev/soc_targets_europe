@@ -12,6 +12,8 @@ geopandas = "==0.12.2"
 scikit-learn = "==1.0.2"
 plotly = "==5.5.0"
 shapely = "==2.0.1"
+matplotlib-scalebar = "*"
+kaleido = "*"
 
 [dev-packages]
 

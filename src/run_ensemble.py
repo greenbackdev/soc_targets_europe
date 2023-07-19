@@ -3,7 +3,7 @@ Compares the four approaches,
 computes the ensemble modelling (median of the results of NRP, DDRM, CLZs),
 produces plots and maps.
 """
-
+from maps_tools import add_scalebar, add_north_arrow
 from scipy.stats import spearmanr
 from matplotlib.colors import BoundaryNorm
 from matplotlib.offsetbox import AnchoredText
@@ -151,6 +151,11 @@ cmap = ListedColormap([colors(i) for i in range(3)])
 data.plot('intermediate_method', markersize=1, ax=ax, legend=True,
           cmap=cmap, categories=['NRP', 'DDRM', 'CLZs'])
 
+add_scalebar(ax)
+add_north_arrow(ax, headlength=15)
+ax.tick_params(axis='x', labelsize=18)
+ax.tick_params(axis='y', labelsize=18)
+
 left, bottom, width, height = [0.28, 0.7, 0.18, 0.15]
 ax2 = fig.add_axes([left, bottom, width, height])
 sns.histplot(data=data, x='intermediate_method', ax=ax2, shrink=.8)
@@ -222,7 +227,7 @@ corrcoeff, pvalue = correlate(data.filter(
     regex='^vref(_nrppc|_ddrm|_clz)$', axis=1))
 
 corrcoeff.to_csv(
-    os.path.join(tables_folder, 'table2.csv')
+    os.path.join(tables_folder, 'correlations.csv')
 )
 
 # Maps
@@ -297,6 +302,10 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
         data.plot(f'{variable}_median', markersize=markersize,
                   ax=axs, norm=norm, cmap=cmap)
         axs.set_title("Median", fontsize=28)
+        add_scalebar(axs)
+        add_north_arrow(axs, headlength=15)
+        axs.tick_params(axis='x', labelsize=18)
+        axs.tick_params(axis='y', labelsize=18)
 
         if annotate:
             add_textbox('_median', axs)
@@ -340,6 +349,10 @@ def plot_map(data, variable, file_path, variable_name=None, higher_better=True,
                 ax=ax, linewidth=1, facecolor='gray', alpha=0.1, color='black')
             ax.set_xlim(xlim)
             ax.set_ylim(ylim)
+            add_scalebar(ax)
+            add_north_arrow(ax, headlength=15)
+            ax.tick_params(axis='x', labelsize=18)
+            ax.tick_params(axis='y', labelsize=18)
 
     # Add colorbar
     if median_only:
@@ -445,6 +458,12 @@ def plot_difference_map(data, variable, file_path, variable_name=None, higher_be
                     ax=axs[2], norm=norm, cmap=cmap)
     axs[2].set_title(
         f"{variable_name}(DDRM) - {variable_name}(CLZs)", fontsize=28)
+
+    for ax in axs:
+        add_scalebar(ax)
+        add_north_arrow(ax, headlength=15)
+        ax.tick_params(axis='x', labelsize=18)
+        ax.tick_params(axis='y', labelsize=18)
 
     if annotate:
         add_textbox(datadiff12, axs[0])
@@ -643,6 +662,11 @@ cmap = ListedColormap([colors(i) for i in range(3)])
 data.plot(markersize=1, ax=ax, color='gray', alpha=0.1)
 data[(data.sand > 80) & (data["C/N"] > 13)].plot(markersize=1,
                                                  ax=ax, color='black', label='Black sands')
+
+add_scalebar(ax)
+add_north_arrow(ax, headlength=15)
+ax.tick_params(axis='x', labelsize=18)
+ax.tick_params(axis='y', labelsize=18)
 
 ax.legend()
 plt.savefig(os.path.join(figures_folder, 'supplementaryfigure7.png'),

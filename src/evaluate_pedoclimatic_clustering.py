@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 
 from importers.lucas_importer import LucasDataImporter
 from models.pedoclimatic_clustering import PedoclimaticClustering
+from maps_tools import add_scalebar, add_north_arrow
 
 
 class PedoclimaticClusteringEvaluation:
@@ -161,8 +162,23 @@ class PedoclimaticClusteringEvaluation:
             ax.set_xlim(-15, 40)
             ax.set_ylim(32, 75)
 
-            df.set_crs("EPSG:4326").plot('Cluster_climate', markersize=3, ax=ax,
-                                         legend=True, categorical=True, cmap=clusters_cmap_climate_)
+            df.set_crs("EPSG:4326").plot(
+                'Cluster_climate',
+                markersize=3,
+                ax=ax,
+                legend=True,
+                legend_kwds={
+                    'fontsize': 20,
+                    'loc': 'lower right'
+                },
+                categorical=True,
+                cmap=clusters_cmap_climate_
+            )
+
+            add_scalebar(ax)
+            add_north_arrow(ax)
+            ax.tick_params(axis='x', labelsize=18)
+            ax.tick_params(axis='y', labelsize=18)
 
             plt.tight_layout()
             plt.savefig(
@@ -186,8 +202,10 @@ class PedoclimaticClusteringEvaluation:
         else:
             chart = sns.boxplot(x=x, y=y, data=df, order=grouped.index, ax=ax)
         chart.set(title=title)
-        chart.set_xticklabels(chart.get_xticklabels(),
-                              rotation=45, horizontalalignment='right')
+        chart.set_xticklabels(
+            chart.get_xticklabels(),
+            horizontalalignment='right',
+        )
 
     def _plot_clusters_soil_carbonates(self, output_clustering):
         figures_folder = os.path.join(
@@ -204,6 +222,10 @@ class PedoclimaticClusteringEvaluation:
             fig, ax = plt.subplots(figsize=(5, 5))
             self._boxplot(x="Cluster_soil", y='CaCO3', df=df,
                           palette=cluster_colors_soil_, ax=ax)
+            ax.tick_params(axis='x', labelsize=18)
+            ax.tick_params(axis='y', labelsize=18)
+            ax.set_xlabel('Soil cluster', fontsize=18)
+            ax.set_ylabel('CaCO3 [g/kg]', fontsize=18)
             plt.tight_layout()
             plt.savefig(
                 os.path.join(
@@ -219,15 +241,29 @@ class PedoclimaticClusteringEvaluation:
 
     def _plot_clusters_soil_texture(self, output_clustering):
         figures_folder = os.path.join(
-            self.figures_folder, 'soil_clusters_texture')
+            self.figures_folder,
+            'soil_clusters_texture'
+        )
         os.makedirs(figures_folder, exist_ok=True)
 
         for df in output_clustering:
             cluster_labels_soil_ = sorted(df.Cluster_soil.unique())
             for c in cluster_labels_soil_:
-                fig = px.scatter_ternary(df[df.Cluster_soil == c],
-                                         a="clay", b="sand", c="silt",
-                                         title="Cluster_soil {0:d}".format(c), width=500, height=500)
+                fig = px.scatter_ternary(
+                    df[df.Cluster_soil == c],
+                    a="clay",
+                    b="sand",
+                    c="silt",
+                    title="Cluster_soil {0:d}".format(c),
+                    width=500,
+                    height=500
+                )
+                fig.update_layout(
+                    font=dict(
+                        size=18,
+                    )
+                )
+
                 fig.write_image(
                     os.path.join(
                         figures_folder,

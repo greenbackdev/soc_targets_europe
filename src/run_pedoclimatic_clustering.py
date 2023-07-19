@@ -7,6 +7,7 @@ Saves results to output/pedoclimatic_clustering.
 
 from models.pedoclimatic_clustering import PedoclimaticClustering
 from importers.lucas_importer import LucasDataImporter
+from maps_tools import add_scalebar, add_north_arrow
 import os
 import pickle
 import geopandas as gpd
@@ -125,11 +126,36 @@ for ax in axs:
     ax.set_xlim(-15, 40)
     ax.set_ylim(32, 75)
 
-data.set_crs("EPSG:4326").plot('Cluster_climate', markersize=3,
-                               ax=axs[0], legend=True, categorical=True, cmap=clusters_cmap_climate)
+data.set_crs("EPSG:4326").plot(
+    'Cluster_climate',
+    markersize=3,
+    ax=axs[0],
+    legend=True,
+    legend_kwds={
+        'fontsize': 20,
+        'loc': 'lower right'
+    },
+    categorical=True,
+    cmap=clusters_cmap_climate
+)
 
-data.set_crs("EPSG:4326").plot('Cluster_soil', markersize=3,
-                               ax=axs[1], legend=True, categorical=True, cmap=clusters_cmap_soil)
+data.set_crs("EPSG:4326").plot(
+    'Cluster_soil',
+    markersize=3,
+    ax=axs[1],
+    legend=True,
+    legend_kwds={
+        'fontsize': 20,
+        'loc': 'lower right'
+    },
+    categorical=True,
+    cmap=clusters_cmap_soil)
+
+for ax in axs:
+    add_scalebar(ax)
+    add_north_arrow(ax)
+    ax.tick_params(axis='x', labelsize=18)
+    ax.tick_params(axis='y', labelsize=18)
 
 plt.tight_layout()
 plt.savefig(os.path.join(figures_folder, 'figure1A.png'),
@@ -139,9 +165,21 @@ plt.close()
 # figure 2
 
 for c in cluster_labels_soil:
-    fig = px.scatter_ternary(data[data.Cluster_soil == c],
-                             a="clay", b="sand", c="silt", opacity=0.2,
-                             title="Cluster soil {0:d}".format(c), width=500, height=500)
+    fig = px.scatter_ternary(
+        data[data.Cluster_soil == c],
+        a="clay",
+        b="sand",
+        c="silt",
+        opacity=0.2,
+        title="Cluster soil {0:d}".format(c),
+        width=500,
+        height=500
+    )
+    fig.update_layout(
+        font=dict(
+            size=18,
+        )
+    )
     fig.write_image(
         os.path.join(
             figures_folder,

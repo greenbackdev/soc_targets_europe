@@ -6,6 +6,8 @@ change land cover between 2009 and 2015.
 """
 
 from models.natural_references_per_pedoclimate import CarbonReferenceValuesComputer
+from maps_tools import add_scalebar, add_north_arrow
+
 from matplotlib.colors import BoundaryNorm
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -43,10 +45,10 @@ data = data.set_crs("EPSG:4326")
 # Select LUCAS sites that did not change land cover between 2009 and 2015
 data = data[data.LC1_2009.str[0] == data.LC1_2015.str[0]]
 
-# Table 3
+# Supplementary table 1
 data_cluster103 = data[(data.Cluster_climate == 10) & (data.Cluster_soil == 3)]
 data_cluster103.groupby('LC0_Desc_2015').toc.describe().to_csv(
-    os.path.join(tables_folder, 'table3.csv')
+    os.path.join(tables_folder, 'supplementary_table1.csv')
 )
 
 # Supplementary figure 6
@@ -73,6 +75,12 @@ axs[1].set_title("Grasslands")
 data[(data.Cluster_climate == cc) & (data.Cluster_soil == cs) & (
     data.LC0_Desc_2015 == "Woodland")].plot("toc", norm=norm, cmap=cmap, ax=axs[2], markersize=3)
 axs[2].set_title("Woodlands")
+
+for ax in axs:
+    add_scalebar(ax, location='upper left')
+    add_north_arrow(ax, x=0.9, headlength=15)
+    ax.tick_params(axis='x', labelsize=18)
+    ax.tick_params(axis='y', labelsize=18)
 
 xlim = (min([ax.get_xlim()[0] for ax in axs]),
         max([ax.get_xlim()[1] for ax in axs]))
