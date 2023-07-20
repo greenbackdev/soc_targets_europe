@@ -247,10 +247,12 @@ for clz in clz_labels:
                     color=cluster_colors_clz[clz], label=clz, marker='o')
 
 ax.set_xlim(0, 120)
-ax.set_xlabel("SOC", fontsize=28)
-ax.set_ylabel("P(SOC)", fontsize=28)
-ax.set_title('Carbon Landscape Zones', fontsize=28)
-ax.legend(fontsize=16, ncol=2)
+ax.set_xlabel("SOC [gC/kg]", fontsize=30)
+ax.set_ylabel("P(SOC)", fontsize=30)
+ax.set_title('Carbon Landscape Zones', fontsize=30)
+ax.set_xticklabels([f'{x:.0f}' for x in ax.get_xticks()], fontsize=20)
+ax.set_yticklabels([f'{y:.2f}' for y in ax.get_yticks()], fontsize=20)
+ax.legend(fontsize=28, ncol=2)
 
 plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2B.png'),
             format='png', dpi=600)

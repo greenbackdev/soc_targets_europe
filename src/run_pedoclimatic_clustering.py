@@ -208,10 +208,12 @@ for ax, lc in zip(axs, ['Cropland', 'Grassland', 'Woodland']):
                             color=cluster_colors_climate[cc], marker=cluster_marker_soil[cs], label="{0}-{1}".format(cc, cs))
 
     ax.set_xlim(0, 120)
-    ax.set_xlabel("SOC [gC/kg]", fontsize=28)
-    ax.set_ylabel("P(SOC)", fontsize=28)
-    ax.set_title(lc+'s', fontsize=28)
-    ax.legend(fontsize=16, ncol=2)
+    ax.set_xlabel("SOC [gC/kg]", fontsize=30)
+    ax.set_ylabel("P(SOC)", fontsize=30)
+    ax.set_title(lc+'s', fontsize=30)
+    ax.set_xticklabels([f'{x:.0f}' for x in ax.get_xticks()], fontsize=20)
+    ax.set_yticklabels([f'{y:.2f}' for y in ax.get_yticks()], fontsize=20)
+    ax.legend(fontsize=22, ncol=3)
 
 plt.savefig(os.path.join(figures_folder, 'supplementaryfigure2A.png'),
             format='png', dpi=600)
